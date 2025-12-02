@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "urbanvac_webpage_for_invoicing_quotation_cash-reciept",
+  "license": "ISC",
+  "author": "Anish & Archisman",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
