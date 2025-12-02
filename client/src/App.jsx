@@ -22,7 +22,7 @@ function App() {
           <Route path="/" element={<Navigate to="/admin" />} />
 
           {/* Main Routes */}
-          <Route path="/admin" element={<AdminPanel />} />
+          {/* <Route path="/admin" element={<AdminPanel />} /> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/invoices/new" element={<NewInvoice />} />
 
