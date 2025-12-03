@@ -1,40 +1,73 @@
-import puppeteer from 'puppeteer';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
+import puppeteer from "puppeteer";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Ensure invoices directory exists
-const invoicesDir = path.join(__dirname, '..', 'invoices');
+const invoicesDir = path.join(__dirname, "..", "invoices");
 if (!fs.existsSync(invoicesDir)) {
   fs.mkdirSync(invoicesDir, { recursive: true });
 }
 
+// Get logo as base64
+const getLogoBase64 = () => {
+  try {
+    const logoPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "client",
+      "src",
+      "assets",
+      "urbanvaclogo.png"
+    );
+    if (fs.existsSync(logoPath)) {
+      const logoBuffer = fs.readFileSync(logoPath);
+      return `data:image/png;base64,${logoBuffer.toString("base64")}`;
+    }
+  } catch (error) {
+    console.error("Error loading logo:", error);
+  }
+  return "";
+};
+
 // Generate HTML template for invoice
 const generateInvoiceHTML = (invoice) => {
   const documentTypeText = {
-    invoice: 'INVOICE',
-    quotation: 'QUOTATION',
-    cash_receipt: 'CASH RECEIPT',
+    invoice: "INVOICE",
+    quotation: "QUOTATION",
+    cash_receipt: "CASH RECEIPT",
   };
 
-  const docType = documentTypeText[invoice.documentType] || 'INVOICE';
+  const docType = documentTypeText[invoice.documentType] || "INVOICE";
+  const logoBase64 = getLogoBase64();
 
   const itemsHTML = invoice.items
     .map(
       (item, index) => `
     <tr>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">${index + 1}</td>
-      <td style="padding: 12px; border-bottom: 1px solid #eee;">${item.description}</td>
-      <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee;">${item.quantity}</td>
-      <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">$${item.price.toFixed(2)}</td>
-      <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">$${item.total.toFixed(2)}</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">${
+        index + 1
+      }</td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">${
+        item.description
+      }</td>
+      <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee;">${
+        item.quantity
+      }</td>
+      <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">$${item.price.toFixed(
+        2
+      )}</td>
+      <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">$${item.total.toFixed(
+        2
+      )}</td>
     </tr>
   `
     )
-    .join('');
+    .join("");
 
   return `
     <!DOCTYPE html>
@@ -67,6 +100,17 @@ const generateInvoiceHTML = (invoice) => {
           border-bottom: 3px solid #2c3e50;
         }
         .company-info {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+        .company-logo {
+          width: 72px;
+          height: 72px;
+          object-fit: contain;
+        }
+        .company-text {
           flex: 1;
         }
         .company-name {
@@ -217,12 +261,19 @@ const generateInvoiceHTML = (invoice) => {
       <div class="container">
         <div class="header">
           <div class="company-info">
-            <div class="company-name">Urban Vac Roof & Gutter Pty Ltd</div>
-            <div class="company-details">
-              ABN: 12 345 678 901<br>
-              123 Business St, Sydney NSW 2000<br>
-              Phone: (02) 1234 5678<br>
-              Email: info@urbanvac.com
+            ${
+              logoBase64
+                ? `<img src="${logoBase64}" alt="Urban Vac Logo" class="company-logo" />`
+                : ""
+            }
+            <div class="company-text">
+              <div class="company-name">Urban Vac Roof & Gutter Pvt Ltd</div>
+              <div class="company-details">
+                ABN: 50 679 172 948<br>
+                19, Colchester Ave, Cranbourne, west 3977<br>
+                Phone: +61 426 371 500<br>
+                Email: info.urbanvac@gmail.com <br> www.urbanvac.com.au 
+              </div>
             </div>
           </div>
           <div class="invoice-info">
@@ -234,18 +285,22 @@ const generateInvoiceHTML = (invoice) => {
         <div class="dates">
           <div class="date-section">
             <div class="date-label">Issue Date</div>
-            <div class="date-value">${new Date(invoice.issueDate).toLocaleDateString('en-AU', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
+            <div class="date-value">${new Date(
+              invoice.issueDate
+            ).toLocaleDateString("en-AU", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
             })}</div>
           </div>
           <div class="date-section">
             <div class="date-label">Due Date</div>
-            <div class="date-value">${new Date(invoice.dueDate).toLocaleDateString('en-AU', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
+            <div class="date-value">${new Date(
+              invoice.dueDate
+            ).toLocaleDateString("en-AU", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
             })}</div>
           </div>
         </div>
@@ -288,7 +343,7 @@ const generateInvoiceHTML = (invoice) => {
             <div class="total-value">$${invoice.gst.toFixed(2)}</div>
           </div>
           `
-              : ''
+              : ""
           }
           <div class="total-row grand-total">
             <div class="total-label">Total:</div>
@@ -297,19 +352,18 @@ const generateInvoiceHTML = (invoice) => {
         </div>
 
         ${
-          invoice.documentType === 'invoice'
+          invoice.documentType === "invoice"
             ? `
         <div class="payment-info">
           <div class="payment-title">Payment Information</div>
           <div class="payment-details">
-            <strong>Bank:</strong> ANZ<br>
-            <strong>BSB:</strong> 012-003<br>
-            <strong>Account Number:</strong> 123456789<br>
-            <strong>Reference:</strong> INV-${invoice.invoiceNumber}
+            <strong>Commbank BSB:</strong> 063 250<br>
+            <strong>A/C Name:</strong> Singh<br>
+            <strong>A/C:</strong> 1099 4913<br>
           </div>
         </div>
         `
-            : ''
+            : ""
         }
 
         ${
@@ -320,7 +374,7 @@ const generateInvoiceHTML = (invoice) => {
           ${invoice.notes}
         </div>
         `
-            : ''
+            : ""
         }
 
         <div class="footer">
@@ -341,26 +395,26 @@ export const generateInvoicePDF = async (invoice) => {
 
     // Launch headless browser
     browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: "networkidle0" });
 
-    const pdfFileName = `Invoice_${invoice.invoiceNumber}.pdf`;
+    const pdfFileName = `INV-NO_${invoice.invoiceNumber}.pdf`;
     const pdfPath = path.join(invoicesDir, pdfFileName);
 
     // Generate PDF
     await page.pdf({
       path: pdfPath,
-      format: 'A4',
+      format: "A4",
       printBackground: true,
       margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px',
+        top: "20px",
+        right: "20px",
+        bottom: "20px",
+        left: "20px",
       },
     });
 
@@ -375,7 +429,7 @@ export const generateInvoicePDF = async (invoice) => {
     if (browser) {
       await browser.close();
     }
-    console.error('PDF generation error:', error);
+    console.error("PDF generation error:", error);
     throw new Error(`Failed to generate PDF: ${error.message}`);
   }
 };

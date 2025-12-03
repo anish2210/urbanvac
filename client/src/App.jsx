@@ -9,25 +9,33 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Navbar } from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
-import { NewInvoice } from "./pages/NewInvoice";
-import AdminPanel from "./pages/AdminPanel";
+import NewInvoice from "./pages/NewInvoice";
+import InvoiceView from "./pages/InvoiceView";
+// import AdminPanel from "./pages/AdminPanel";
+// import Login from "./pages/Login";
+// import Register from "./pages/Register";
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+      <div className="min-h-screen bg-gray-100">
         <Navbar />
         <Routes>
-          {/* Redirect root to admin panel */}
-          <Route path="/" element={<Navigate to="/admin" />} />
+          {/* Auth Routes */}
+          {/* <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} /> */}
+
+          {/* Redirect root to dashboard */}
+          <Route path="/" element={<Navigate to="/dashboard" />} />
 
           {/* Main Routes */}
           {/* <Route path="/admin" element={<AdminPanel />} /> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/invoices/new" element={<NewInvoice />} />
+          <Route path="/invoices/:id" element={<InvoiceView />} />
 
           {/* 404 Route */}
-          <Route path="*" element={<Navigate to="/admin" />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
 
         <ToastContainer

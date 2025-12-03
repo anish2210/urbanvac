@@ -24,38 +24,48 @@ const InvoiceDashboard = () => {
     }
   };
 
-  const statusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "paid":
-        return "bg-green-600/20 text-green-300 border border-green-500/30";
-      case "unpaid":
-      case "overdue":
-        return "bg-red-600/20 text-red-300 border border-red-500/30";
-      case "draft":
-        return "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30";
-      case "sent":
-        return "bg-blue-600/20 text-blue-300 border border-blue-500/30";
+  const documentTypeColor = (type) => {
+    switch (type?.toLowerCase()) {
+      case "invoice":
+        return "bg-blue-100 text-blue-700 border border-blue-300";
+      case "quotation":
+        return "bg-purple-100 text-purple-700 border border-purple-300";
+      case "cash_receipt":
+        return "bg-green-100 text-green-700 border border-green-300";
       default:
-        return "bg-gray-600/20 text-gray-300 border border-gray-500/30";
+        return "bg-gray-100 text-gray-700 border border-gray-300";
+    }
+  };
+
+  const formatDocumentType = (type) => {
+    switch (type?.toLowerCase()) {
+      case "invoice":
+        return "Invoice";
+      case "quotation":
+        return "Quotation";
+      case "cash_receipt":
+        return "Cash Receipt";
+      default:
+        return type || "N/A";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0E0E0E]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-700 border-t-orange-500"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-orange-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0E0E] text-white px-4 sm:px-6 lg:px-8 py-10">
+    <div className="min-h-screen px-4 sm:px-6 lg:px-8 py-10">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold">All Invoices</h1>
-            <p className="text-gray-400 mt-1 text-sm">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">All Invoices</h1>
+            <p className="text-gray-500 mt-1 text-sm">
               Manage and track all your invoices & quotations
             </p>
           </div>
@@ -71,22 +81,22 @@ const InvoiceDashboard = () => {
         </div>
 
         {/* CARD */}
-        <div className="bg-white/10 backdrop-blur-xl rounded-xl border border-white/10 shadow-xl p-6">
+        <div className="bg-white bg-opacity-10 backdrop-blur-lg border border-white/20 shadow-lg rounded-xl p-6">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-white/10">
+                <tr className="border-b border-black/10">
                   {[
                     "Invoice ID",
                     "Client",
                     "Amount",
-                    "Status",
+                    "Type",
                     "Date",
                     "Actions",
                   ].map((heading) => (
                     <th
                       key={heading}
-                      className="py-4 px-6 text-left text-gray-300 font-medium text-sm tracking-wide"
+                      className="py-4 px-6 text-left text-gray-700 font-medium text-sm tracking-wide"
                     >
                       {heading}
                     </th>
@@ -99,7 +109,7 @@ const InvoiceDashboard = () => {
                   <tr>
                     <td
                       colSpan="6"
-                      className="py-10 text-center text-gray-400 text-sm"
+                      className="py-10 text-center text-gray-500 text-sm"
                     >
                       No invoices found. Create your first invoice!
                     </td>
@@ -108,31 +118,31 @@ const InvoiceDashboard = () => {
                   invoices.map((inv) => (
                     <tr
                       key={inv._id}
-                      className="border-b border-white/5 hover:bg-white/5 transition"
+                      className="border-b border-black/5 hover:bg-black/5 transition"
                     >
-                      <td className="py-4 px-6 font-medium text-white">
+                      <td className="py-4 px-6 font-medium text-gray-900">
                         #{inv.invoiceNumber || inv.invoiceId}
                       </td>
 
-                      <td className="py-4 px-6 text-gray-300">
+                      <td className="py-4 px-6 text-gray-700">
                         {inv.customer?.name || inv.clientName || "-"}
                       </td>
 
-                      <td className="py-4 px-6 font-semibold text-white">
+                      <td className="py-4 px-6 font-semibold text-gray-900">
                         ${(inv.total || inv.amount || 0).toFixed(2)}
                       </td>
 
                       <td className="py-4 px-6">
                         <span
-                          className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${statusColor(
-                            inv.status
+                          className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${documentTypeColor(
+                            inv.documentType
                           )}`}
                         >
-                          {inv.status || "N/A"}
+                          {formatDocumentType(inv.documentType)}
                         </span>
                       </td>
 
-                      <td className="py-4 px-6 text-gray-400">
+                      <td className="py-4 px-6 text-gray-600">
                         {inv.issueDate || inv.date
                           ? new Date(
                               inv.issueDate || inv.date
@@ -142,8 +152,8 @@ const InvoiceDashboard = () => {
 
                       <td className="py-4 px-6">
                         <button
-                          onClick={() => navigate(`/invoices/${inv._id}`)}
-                          className="text-orange-400 hover:text-orange-300 font-medium transition-colors"
+                          onClick={() => window.open(`/invoices/${inv._id}`, '_blank')}
+                          className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
                         >
                           View
                         </button>
