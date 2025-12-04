@@ -110,7 +110,7 @@ EMAIL_USER=your_email@gmail.com
 EMAIL_PASSWORD=your_app_password
 EMAIL_FROM=Urban Vac <noreply@urbanvac.com>
 CLIENT_URL=http://localhost:5173
-INVOICE_START_NUMBER=3003
+INVOICE_START_NUMBER=3000
 ```
 
 4. Start the server:

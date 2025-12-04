@@ -10,7 +10,7 @@ export const getNextInvoiceNumber = async (req, res) => {
     const lastInvoice = await Invoice.findOne().sort({ invoiceNumber: -1 });
     const nextNumber = lastInvoice
       ? lastInvoice.invoiceNumber + 1
-      : parseInt(process.env.INVOICE_START_NUMBER) || 3003;
+      : parseInt(process.env.INVOICE_START_NUMBER) || 3000;
 
     res.json({
       success: true,
@@ -35,7 +35,7 @@ export const createInvoice = async (req, res) => {
     const lastInvoice = await Invoice.findOne().sort({ invoiceNumber: -1 });
     const invoiceNumber = lastInvoice
       ? lastInvoice.invoiceNumber + 1
-      : parseInt(process.env.INVOICE_START_NUMBER) || 3003;
+      : parseInt(process.env.INVOICE_START_NUMBER) || 3000;
 
     // Create invoice
     const invoice = await Invoice.create({
@@ -69,7 +69,7 @@ export const getAllInvoices = async (req, res) => {
   try {
     const {
       page = 1,
-      limit = 10,
+      limit = 100,
       status,
       documentType,
       search,

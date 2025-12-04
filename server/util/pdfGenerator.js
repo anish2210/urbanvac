@@ -15,15 +15,7 @@ if (!fs.existsSync(invoicesDir)) {
 // Get images as base64
 const getImageBase64 = (filename) => {
   try {
-    const imagePath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "client",
-      "src",
-      "assets",
-      filename
-    );
+    const imagePath = path.join(__dirname, "..", "assets", filename);
     if (fs.existsSync(imagePath)) {
       const imageBuffer = fs.readFileSync(imagePath);
       return `data:image/png;base64,${imageBuffer.toString("base64")}`;
