@@ -109,8 +109,13 @@ const InvoiceView = () => {
                   className="w-16 h-16 object-contain"
                 />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Urban Vac</h1>
-                  <p className="text-gray-600">Professional Cleaning Services</p>
+                  <h1 className="text-2xl font-bold text-gray-900">Urban Vac Roof & Gutter Pvt Ltd</h1>
+                  <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                    <p>ABN: 50 679 172 948</p>
+                    <p>19, Colchester Ave, Cranbourne, west 3977</p>
+                    <p>Phone: +61 426 371 500</p>
+                    <p>Email: info.urbanvac@gmail.com | www.urbanvac.com.au</p>
+                  </div>
                 </div>
               </div>
               <div className="text-right">
@@ -204,6 +209,16 @@ const InvoiceView = () => {
                   <span className="text-gray-900">Total:</span>
                   <span className="text-orange-500">{formatCurrency(invoice.total)}</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Payment Information */}
+            <div className="mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+              <h3 className="font-semibold text-yellow-900 mb-3">Payment Information</h3>
+              <div className="text-sm text-yellow-900 space-y-1">
+                <p><strong>Commbank BSB:</strong> 063 250</p>
+                <p><strong>A/C Name:</strong> Singh</p>
+                <p><strong>A/C:</strong> 1099 4913</p>
               </div>
             </div>
 

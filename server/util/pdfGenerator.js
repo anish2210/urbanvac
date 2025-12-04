@@ -267,7 +267,7 @@ const generateInvoiceHTML = (invoice) => {
                 : ""
             }
             <div class="company-text">
-              <div class="company-name">Urban Vac Roof & Gutter Pvt Ltd</div>
+              <div class="company-name">Urban Vac Roof & Gutter Pty Ltd</div>
               <div class="company-details">
                 ABN: 50 679 172 948<br>
                 19, Colchester Ave, Cranbourne, west 3977<br>
@@ -351,9 +351,6 @@ const generateInvoiceHTML = (invoice) => {
           </div>
         </div>
 
-        ${
-          invoice.documentType === "invoice"
-            ? `
         <div class="payment-info">
           <div class="payment-title">Payment Information</div>
           <div class="payment-details">
@@ -362,9 +359,6 @@ const generateInvoiceHTML = (invoice) => {
             <strong>A/C:</strong> 1099 4913<br>
           </div>
         </div>
-        `
-            : ""
-        }
 
         ${
           invoice.notes

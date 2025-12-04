@@ -116,6 +116,11 @@ const NewInvoice = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Prevent double submission
+    if (loading) {
+      return;
+    }
+
     if (!formData.customer.name || !formData.customer.email) {
       toast.error("Please fill in customer details");
       return;
@@ -133,7 +138,6 @@ const NewInvoice = () => {
       navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to create invoice");
-    } finally {
       setLoading(false);
     }
   };
