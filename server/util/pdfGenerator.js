@@ -368,10 +368,17 @@ export const generateInvoicePDF = async (invoice) => {
   try {
     const html = generateInvoiceHTML(invoice);
 
-    // Launch headless browser
+    // Puppeteer launch for Render.com
     browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--font-render-hinting=none",
+      ],
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
     });
 
     const page = await browser.newPage();
@@ -408,3 +415,4 @@ export const generateInvoicePDF = async (invoice) => {
     throw new Error(`Failed to generate PDF: ${error.message}`);
   }
 };
+
