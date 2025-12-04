@@ -12,27 +12,31 @@ if (!fs.existsSync(invoicesDir)) {
   fs.mkdirSync(invoicesDir, { recursive: true });
 }
 
-// Get logo as base64
-const getLogoBase64 = () => {
+// Get images as base64
+const getImageBase64 = (filename) => {
   try {
-    const logoPath = path.join(
+    const imagePath = path.join(
       __dirname,
       "..",
       "..",
       "client",
       "src",
       "assets",
-      "urbanvaclogo.png"
+      filename
     );
-    if (fs.existsSync(logoPath)) {
-      const logoBuffer = fs.readFileSync(logoPath);
-      return `data:image/png;base64,${logoBuffer.toString("base64")}`;
+    if (fs.existsSync(imagePath)) {
+      const imageBuffer = fs.readFileSync(imagePath);
+      return `data:image/png;base64,${imageBuffer.toString("base64")}`;
     }
   } catch (error) {
-    console.error("Error loading logo:", error);
+    console.error(`Error loading ${filename}:`, error);
   }
   return "";
 };
+
+const getLogoBase64 = () => getImageBase64("urbanvaclogo.png");
+const getHeaderBase64 = () => getImageBase64("Header.png");
+const getFooterBase64 = () => getImageBase64("Footer.png");
 
 // Generate HTML template for invoice
 const generateInvoiceHTML = (invoice) => {
@@ -43,7 +47,8 @@ const generateInvoiceHTML = (invoice) => {
   };
 
   const docType = documentTypeText[invoice.documentType] || "INVOICE";
-  const logoBase64 = getLogoBase64();
+  const headerBase64 = getHeaderBase64();
+  const footerBase64 = getFooterBase64();
 
   const itemsHTML = invoice.items
     .map(
@@ -82,298 +87,282 @@ const generateInvoiceHTML = (invoice) => {
           box-sizing: border-box;
         }
         body {
-          font-family: 'Helvetica Neue', Arial, sans-serif;
+          font-family: Arial, sans-serif;
           color: #333;
           line-height: 1.6;
+          background-color: #f5f5f5;
         }
-        .container {
-          max-width: 800px;
+        .page {
+          max-width: 210mm;
           margin: 0 auto;
-          padding: 40px;
+          background: white;
+          position: relative;
+          min-height: 297mm;
         }
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 40px;
-          padding-bottom: 20px;
-          border-bottom: 3px solid #2c3e50;
+        .header-image {
+          width: 100%;
+          height: auto;
+          display: block;
         }
-        .company-info {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          gap: 15px;
-        }
-        .company-logo {
-          width: 72px;
-          height: 72px;
-          object-fit: contain;
-        }
-        .company-text {
-          flex: 1;
-        }
-        .company-name {
-          font-size: 24px;
-          font-weight: bold;
-          color: #2c3e50;
-          margin-bottom: 5px;
-        }
-        .company-details {
-          font-size: 12px;
-          color: #666;
-          line-height: 1.4;
-        }
-        .invoice-info {
-          text-align: right;
-        }
-        .invoice-type {
+        .invoice-title {
+          text-align: center;
           font-size: 28px;
           font-weight: bold;
-          color: #2c3e50;
-          margin-bottom: 10px;
-        }
-        .invoice-number {
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 5px;
-        }
-        .dates {
-          margin-top: 30px;
-          display: flex;
-          justify-content: space-between;
-        }
-        .date-section {
-          flex: 1;
-        }
-        .date-label {
-          font-weight: bold;
-          color: #555;
-          font-size: 12px;
-          margin-bottom: 5px;
-        }
-        .date-value {
-          font-size: 14px;
+          margin: 20px 0;
           color: #333;
         }
-        .customer-section {
-          margin: 30px 0;
-          padding: 20px;
-          background-color: #f8f9fa;
-          border-radius: 5px;
+        .content {
+          padding: 0 40px;
         }
-        .section-title {
-          font-size: 14px;
+        .info-section {
+          display: table;
+          width: 100%;
+          margin-bottom: 30px;
+        }
+        .info-left, .info-right {
+          display: table-cell;
+          width: 50%;
+          vertical-align: top;
+        }
+        .info-right {
+          text-align: right;
+        }
+        .section-heading {
           font-weight: bold;
-          color: #2c3e50;
           margin-bottom: 10px;
+          font-size: 14px;
         }
-        .customer-details {
+        .info-text {
           font-size: 13px;
-          line-height: 1.6;
+          line-height: 1.8;
+        }
+        .bank-details {
+          margin-top: 30px;
+        }
+        .bill-details {
+          margin-top: 20px;
+        }
+        .items-section {
+          margin: 40px 0;
+        }
+        .items-heading {
+          font-weight: bold;
+          font-size: 16px;
+          margin-bottom: 15px;
         }
         .items-table {
           width: 100%;
-          margin: 30px 0;
           border-collapse: collapse;
+          margin-bottom: 20px;
         }
         .items-table thead {
-          background-color: #2c3e50;
-          color: white;
+          background-color: #e8e8e8;
         }
         .items-table th {
-          padding: 12px;
+          padding: 10px;
           text-align: left;
-          font-weight: 600;
-          font-size: 12px;
-          text-transform: uppercase;
+          font-weight: bold;
+          font-size: 13px;
+          border: 1px solid #ccc;
+        }
+        .items-table th:nth-child(2) {
+          text-align: center;
         }
         .items-table th:nth-child(3),
-        .items-table th:nth-child(4),
-        .items-table th:nth-child(5) {
+        .items-table th:nth-child(4) {
+          text-align: right;
+        }
+        .items-table td {
+          padding: 10px;
+          border: 1px solid #ccc;
+          font-size: 13px;
+        }
+        .items-table td:nth-child(2) {
+          text-align: center;
+        }
+        .items-table td:nth-child(3),
+        .items-table td:nth-child(4) {
           text-align: right;
         }
         .totals {
           margin-top: 20px;
           text-align: right;
+          padding-right: 10px;
         }
         .total-row {
-          display: flex;
-          justify-content: flex-end;
-          padding: 8px 0;
+          margin: 8px 0;
           font-size: 14px;
         }
-        .total-label {
-          width: 150px;
-          text-align: right;
-          padding-right: 20px;
-          font-weight: 600;
-          color: #555;
-        }
-        .total-value {
-          width: 120px;
-          text-align: right;
-        }
-        .grand-total {
-          border-top: 2px solid #2c3e50;
-          margin-top: 10px;
-          padding-top: 10px;
-          font-size: 18px;
+        .total-row.grand-total {
           font-weight: bold;
-          color: #2c3e50;
+          font-size: 16px;
+          margin-top: 15px;
         }
-        .payment-info {
-          margin-top: 40px;
-          padding: 20px;
-          background-color: #fff3cd;
-          border-left: 4px solid #ffc107;
-          border-radius: 5px;
-        }
-        .payment-title {
+        .thank-you {
+          text-align: center;
+          margin: 60px 0 40px 0;
           font-weight: bold;
-          margin-bottom: 10px;
-          color: #856404;
+          font-size: 14px;
         }
-        .payment-details {
-          font-size: 13px;
-          line-height: 1.8;
-          color: #856404;
-        }
-        .notes {
-          margin-top: 30px;
+        ${
+          invoice.notes
+            ? `
+        .notes-section {
+          margin: 30px 0;
           padding: 15px;
           background-color: #f8f9fa;
           border-radius: 5px;
-          font-size: 12px;
-          color: #666;
         }
-        .footer {
-          margin-top: 50px;
-          padding-top: 20px;
-          border-top: 1px solid #ddd;
-          text-align: center;
-          font-size: 11px;
-          color: #999;
+        .notes-heading {
+          font-weight: bold;
+          margin-bottom: 10px;
+        }
+        .notes-text {
+          font-size: 13px;
+          white-space: pre-line;
+        }
+        `
+            : ""
+        }
+        .footer-wrapper {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+        }
+        .footer-image {
+          width: 100%;
+          height: auto;
+          display: block;
+          position: relative;
+        }
+        .abn-text {
+          position: absolute;
+          bottom: 20px;
+          right: 40px;
+          font-size: 24px;
+          font-weight: bold;
+          color: #333;
         }
       </style>
     </head>
     <body>
-      <div class="container">
-        <div class="header">
-          <div class="company-info">
-            ${
-              logoBase64
-                ? `<img src="${logoBase64}" alt="Urban Vac Logo" class="company-logo" />`
-                : ""
-            }
-            <div class="company-text">
-              <div class="company-name">Urban Vac Roof & Gutter Pty Ltd</div>
-              <div class="company-details">
-                ABN: 50 679 172 948<br>
-                19, Colchester Ave, Cranbourne, west 3977<br>
-                Phone: +61 426 371 500<br>
-                Email: info.urbanvac@gmail.com <br> www.urbanvac.com.au 
+      <div class="page">
+        ${
+          headerBase64
+            ? `<img src="${headerBase64}" alt="Urban Vac Header" class="header-image" />`
+            : ""
+        }
+
+        <div class="invoice-title">${docType}</div>
+
+        <div class="content">
+          <div class="info-section">
+            <div class="info-left">
+              <div class="section-heading">To</div>
+              <div class="info-text">
+                ${invoice.customer.phone}<br>
+                ${invoice.customer.address}
+              </div>
+
+              <div class="bank-details">
+                <div class="section-heading">Bank Details</div>
+                <div class="info-text">
+                  Commbank BSB: 063 250<br>
+                  A/C Name: Singh<br>
+                  A/C: 1099 4913
+                </div>
+              </div>
+            </div>
+
+            <div class="info-right">
+              <div class="section-heading">From</div>
+              <div class="info-text">
+                Urbanvac Roof and Gutter Pty Ltd.<br>
+                19 Colchester Ave<br>
+                Cranbourne West 3977
+              </div>
+
+              <div class="bill-details">
+                <div class="info-text">
+                  <strong>Bill No:</strong> ${invoice.invoiceNumber}<br>
+                  <strong>Bill Date:</strong> ${new Date(
+                    invoice.issueDate
+                  ).toLocaleDateString("en-AU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
+                </div>
               </div>
             </div>
           </div>
-          <div class="invoice-info">
-            <div class="invoice-type">${docType}</div>
-            <div class="invoice-number">#${invoice.invoiceNumber}</div>
-          </div>
-        </div>
 
-        <div class="dates">
-          <div class="date-section">
-            <div class="date-label">Issue Date</div>
-            <div class="date-value">${new Date(
-              invoice.issueDate
-            ).toLocaleDateString("en-AU", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}</div>
-          </div>
-          <div class="date-section">
-            <div class="date-label">Due Date</div>
-            <div class="date-value">${new Date(
-              invoice.dueDate
-            ).toLocaleDateString("en-AU", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}</div>
-          </div>
-        </div>
+          <div class="items-section">
+            <div class="items-heading">Items</div>
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoice.items
+                  .map(
+                    (item) => `
+                  <tr>
+                    <td>${item.description}</td>
+                    <td>${item.quantity}</td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td>$${item.total.toFixed(2)}</td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
 
-        <div class="customer-section">
-          <div class="section-title">Bill To</div>
-          <div class="customer-details">
-            <strong>${invoice.customer.name}</strong><br>
-            ${invoice.customer.address}<br>
-            Phone: ${invoice.customer.phone}<br>
-            Email: ${invoice.customer.email}
+            <div class="totals">
+              <div class="total-row">Subtotal: $${invoice.subtotal.toFixed(
+                2
+              )}</div>
+              ${
+                invoice.gst > 0
+                  ? `<div class="total-row">GST (10%): $${invoice.gst.toFixed(
+                      2
+                    )}</div>`
+                  : ""
+              }
+              <div class="total-row grand-total">Total: $${invoice.total.toFixed(
+                2
+              )}</div>
+            </div>
           </div>
-        </div>
 
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th style="width: 5%;">#</th>
-              <th style="width: 45%;">Description</th>
-              <th style="width: 15%; text-align: center;">Qty</th>
-              <th style="width: 15%; text-align: right;">Price</th>
-              <th style="width: 20%; text-align: right;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHTML}
-          </tbody>
-        </table>
-
-        <div class="totals">
-          <div class="total-row">
-            <div class="total-label">Subtotal:</div>
-            <div class="total-value">$${invoice.subtotal.toFixed(2)}</div>
-          </div>
           ${
-            invoice.gst > 0
+            invoice.notes
               ? `
-          <div class="total-row">
-            <div class="total-label">GST (10%):</div>
-            <div class="total-value">$${invoice.gst.toFixed(2)}</div>
+          <div class="notes-section">
+            <div class="notes-heading">Notes:</div>
+            <div class="notes-text">${invoice.notes}</div>
           </div>
           `
               : ""
           }
-          <div class="total-row grand-total">
-            <div class="total-label">Total:</div>
-            <div class="total-value">$${invoice.total.toFixed(2)}</div>
-          </div>
+
+          <div class="thank-you">Thank you for your business!</div>
         </div>
 
-        <div class="payment-info">
-          <div class="payment-title">Payment Information</div>
-          <div class="payment-details">
-            <strong>Commbank BSB:</strong> 063 250<br>
-            <strong>A/C Name:</strong> Singh<br>
-            <strong>A/C:</strong> 1099 4913<br>
-          </div>
-        </div>
-
-        ${
-          invoice.notes
-            ? `
-        <div class="notes">
-          <strong>Notes:</strong><br>
-          ${invoice.notes}
-        </div>
-        `
-            : ""
-        }
-
-        <div class="footer">
-          Thank you for your business!<br>
-          This ${docType.toLowerCase()} was generated electronically and is valid without signature.
+        <div class="footer-wrapper">
+          ${
+            footerBase64
+              ? `<img src="${footerBase64}" alt="Urban Vac Footer" class="footer-image" />`
+              : ""
+          }
+          <div class="abn-text">ABN : 50 679 172 948</div>
         </div>
       </div>
     </body>
@@ -405,10 +394,10 @@ export const generateInvoicePDF = async (invoice) => {
       format: "A4",
       printBackground: true,
       margin: {
-        top: "20px",
-        right: "20px",
-        bottom: "20px",
-        left: "20px",
+        top: "0px",
+        right: "0px",
+        bottom: "0px",
+        left: "0px",
       },
     });
 

@@ -4,7 +4,8 @@ import { invoiceAPI } from "../utils/api";
 import { formatCurrency, formatDate } from "../lib/utils";
 import { Download, Printer } from "lucide-react";
 import { toast } from "react-toastify";
-import urbanVacLogo from "../assets/urbanvaclogo.png";
+import headerImage from "../assets/Header.png";
+import footerImage from "../assets/Footer.png";
 
 const InvoiceView = () => {
   const { id } = useParams();
@@ -77,7 +78,7 @@ const InvoiceView = () => {
     : "INVOICE";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       {/* Print/Download Buttons - Hidden when printing */}
       <div className="print:hidden sticky top-0 bg-white shadow-sm z-10 px-4 py-3 flex justify-end gap-3">
         <button
@@ -96,145 +97,121 @@ const InvoiceView = () => {
         </button>
       </div>
 
-      {/* Invoice Content - Optimized for printing */}
-      <div className="max-w-4xl mx-auto p-8 print:p-0">
-        <div className="bg-white shadow-lg print:shadow-none">
-          <div className="p-8 print:p-12">
-            {/* Header */}
-            <div className="flex justify-between items-start mb-8 pb-6 border-b-2 border-gray-300">
-              <div className="flex items-center gap-4">
-                <img
-                  src={urbanVacLogo}
-                  alt="Urban Vac Logo"
-                  className="w-16 h-16 object-contain"
-                />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">Urban Vac Roof & Gutter Pvt Ltd</h1>
-                  <div className="text-xs text-gray-600 mt-1 space-y-0.5">
-                    <p>ABN: 50 679 172 948</p>
-                    <p>19, Colchester Ave, Cranbourne, west 3977</p>
-                    <p>Phone: +61 426 371 500</p>
-                    <p>Email: info.urbanvac@gmail.com | www.urbanvac.com.au</p>
-                  </div>
+      {/* Invoice Content */}
+      <div className="max-w-[210mm] mx-auto bg-white shadow-lg print:shadow-none my-8 print:my-0">
+        {/* Header Image */}
+        <img src={headerImage} alt="Urban Vac Header" className="w-full h-auto" />
+
+        {/* Invoice Title */}
+        <div className="text-center text-3xl font-bold py-5">
+          {documentTitle}
+        </div>
+
+        {/* Content */}
+        <div className="px-10 pb-20">
+          {/* Info Section */}
+          <div className="grid grid-cols-2 gap-8 mb-8">
+            {/* Left Column */}
+            <div>
+              <div className="mb-8">
+                <h3 className="font-bold mb-2 text-sm">To</h3>
+                <div className="text-sm leading-relaxed">
+                  {invoice.customer?.phone}<br />
+                  {invoice.customer?.address}
                 </div>
               </div>
-              <div className="text-right">
-                <h2 className="text-2xl font-bold text-orange-500 mb-2">
-                  {documentTitle}
-                </h2>
-                <p className="text-gray-600">#{invoice.invoiceNumber}</p>
-              </div>
-            </div>
 
-            {/* Dates and Customer Info */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Bill To:</h3>
-                <div className="text-gray-700">
-                  <p className="font-semibold">{invoice.customer?.name}</p>
-                  <p>{invoice.customer?.email}</p>
-                  <p>{invoice.customer?.phone}</p>
-                  <p className="mt-2 whitespace-pre-line">{invoice.customer?.address}</p>
+                <h3 className="font-bold mb-2 text-sm">Bank Details</h3>
+                <div className="text-sm leading-relaxed">
+                  Commbank BSB: 063 250<br />
+                  A/C Name: Singh<br />
+                  A/C: 1099 4913
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="text-right">
+              <div className="mb-6">
+                <h3 className="font-bold mb-2 text-sm">From</h3>
+                <div className="text-sm leading-relaxed">
+                  Urbanvac Roof and Gutter Pty Ltd.<br />
+                  19 Colchester Ave<br />
+                  Cranbourne West 3977
                 </div>
               </div>
 
-              <div className="text-right">
-                <div className="mb-3">
-                  <span className="font-semibold text-gray-900">Issue Date: </span>
-                  <span className="text-gray-700">{formatDate(invoice.issueDate)}</span>
+              <div className="text-sm leading-relaxed">
+                <div className="mb-1">
+                  <strong>Bill No:</strong> {invoice.invoiceNumber}
                 </div>
-                {invoice.dueDate && (
-                  <div className="mb-3">
-                    <span className="font-semibold text-gray-900">Due Date: </span>
-                    <span className="text-gray-700">{formatDate(invoice.dueDate)}</span>
-                  </div>
-                )}
                 <div>
-                  <span className="font-semibold text-gray-900">Status: </span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    invoice.status === "paid"
-                      ? "bg-green-100 text-green-700"
-                      : invoice.status === "sent"
-                      ? "bg-blue-100 text-blue-700"
-                      : invoice.status === "draft"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}>
-                    {invoice.status?.toUpperCase()}
-                  </span>
+                  <strong>Bill Date:</strong> {new Date(invoice.issueDate).toLocaleDateString("en-AU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
+                  })}
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Items Table */}
-            <div className="mb-8">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-gray-300">
-                    <th className="text-left py-3 font-semibold text-gray-900">Description</th>
-                    <th className="text-right py-3 font-semibold text-gray-900 w-24">Quantity</th>
-                    <th className="text-right py-3 font-semibold text-gray-900 w-32">Price</th>
-                    <th className="text-right py-3 font-semibold text-gray-900 w-32">Total</th>
+          {/* Items Section */}
+          <div className="mt-10 mb-8">
+            <h3 className="font-bold text-base mb-4">Items</h3>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="border border-gray-400 px-3 py-2 text-left text-sm font-bold">Item</th>
+                  <th className="border border-gray-400 px-3 py-2 text-center text-sm font-bold">Quantity</th>
+                  <th className="border border-gray-400 px-3 py-2 text-right text-sm font-bold">Price</th>
+                  <th className="border border-gray-400 px-3 py-2 text-right text-sm font-bold">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.items?.map((item, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-400 px-3 py-2 text-sm">{item.description}</td>
+                    <td className="border border-gray-400 px-3 py-2 text-center text-sm">{item.quantity}</td>
+                    <td className="border border-gray-400 px-3 py-2 text-right text-sm">{formatCurrency(item.price)}</td>
+                    <td className="border border-gray-400 px-3 py-2 text-right text-sm">
+                      {formatCurrency(item.total || item.quantity * item.price)}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {invoice.items?.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-200">
-                      <td className="py-3 text-gray-700">{item.description}</td>
-                      <td className="py-3 text-right text-gray-700">{item.quantity}</td>
-                      <td className="py-3 text-right text-gray-700">{formatCurrency(item.price)}</td>
-                      <td className="py-3 text-right font-semibold text-gray-900">
-                        {formatCurrency(item.total || item.quantity * item.price)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
 
             {/* Totals */}
-            <div className="flex justify-end mb-8">
-              <div className="w-64">
-                <div className="flex justify-between py-2 text-gray-700">
-                  <span>Subtotal:</span>
-                  <span className="font-semibold">{formatCurrency(invoice.subtotal)}</span>
-                </div>
-                {invoice.documentType === "invoice" && invoice.gst > 0 && (
-                  <div className="flex justify-between py-2 text-gray-700">
-                    <span>GST (10%):</span>
-                    <span className="font-semibold">{formatCurrency(invoice.gst)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between py-3 border-t-2 border-gray-300 text-lg font-bold">
-                  <span className="text-gray-900">Total:</span>
-                  <span className="text-orange-500">{formatCurrency(invoice.total)}</span>
-                </div>
-              </div>
+            <div className="mt-5 text-right text-sm">
+              <div className="mb-2">Subtotal: {formatCurrency(invoice.subtotal)}</div>
+              {invoice.documentType === "invoice" && invoice.gst > 0 && (
+                <div className="mb-2">GST (10%): {formatCurrency(invoice.gst)}</div>
+              )}
+              <div className="font-bold text-base mt-4">Total: {formatCurrency(invoice.total)}</div>
             </div>
+          </div>
 
-            {/* Payment Information */}
-            <div className="mb-8 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-              <h3 className="font-semibold text-yellow-900 mb-3">Payment Information</h3>
-              <div className="text-sm text-yellow-900 space-y-1">
-                <p><strong>Commbank BSB:</strong> 063 250</p>
-                <p><strong>A/C Name:</strong> Singh</p>
-                <p><strong>A/C:</strong> 1099 4913</p>
-              </div>
+          {/* Notes */}
+          {invoice.notes && (
+            <div className="mb-8 p-4 bg-gray-50 rounded">
+              <h3 className="font-bold mb-2 text-sm">Notes:</h3>
+              <p className="text-sm whitespace-pre-line">{invoice.notes}</p>
             </div>
+          )}
 
-            {/* Notes */}
-            {invoice.notes && (
-              <div className="mb-8 p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-2">Notes:</h3>
-                <p className="text-gray-700 whitespace-pre-line">{invoice.notes}</p>
-              </div>
-            )}
+          {/* Thank You */}
+          <div className="text-center font-bold text-sm mt-16 mb-10">
+            Thank you for your business!
+          </div>
+        </div>
 
-            {/* Footer */}
-            <div className="pt-6 border-t border-gray-300 text-center text-gray-600 text-sm">
-              <p>Thank you for your business!</p>
-              <p className="mt-2">Urban Vac - Professional Cleaning Services</p>
-            </div>
+        {/* Footer with ABN */}
+        <div className="relative">
+          <img src={footerImage} alt="Urban Vac Footer" className="w-full h-auto" />
+          <div className="absolute bottom-5 right-10 text-2xl font-bold">
+            ABN : 50 679 172 948
           </div>
         </div>
       </div>
