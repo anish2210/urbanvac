@@ -2,15 +2,10 @@ import puppeteer from "puppeteer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import cloudinary from "../config/cloudinary.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Ensure invoices directory exists
-const invoicesDir = path.join(__dirname, "..", "invoices");
-if (!fs.existsSync(invoicesDir)) {
-  fs.mkdirSync(invoicesDir, { recursive: true });
-}
 
 // Get images as base64
 const getImageBase64 = (filename) => {
@@ -362,7 +357,7 @@ const generateInvoiceHTML = (invoice) => {
   `;
 };
 
-// Generate PDF from invoice data
+// Generate PDF from invoice data and upload to Cloudinary
 export const generateInvoicePDF = async (invoice) => {
   let browser;
   try {
@@ -384,12 +379,8 @@ export const generateInvoicePDF = async (invoice) => {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: "networkidle0" });
 
-    const pdfFileName = `INV-NO_${invoice.invoiceNumber}.pdf`;
-    const pdfPath = path.join(invoicesDir, pdfFileName);
-
-    // Generate PDF
-    await page.pdf({
-      path: pdfPath,
+    // Generate PDF as buffer (in memory, not saved to disk)
+    const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
       margin: {
@@ -402,10 +393,40 @@ export const generateInvoicePDF = async (invoice) => {
 
     await browser.close();
 
+    // Upload PDF buffer to Cloudinary
+    const pdfFileName = `INV-NO_${invoice.invoiceNumber}`;
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "raw",
+          folder: "urbanvac/invoices",
+          public_id: pdfFileName,
+          type: "upload",
+          invalidate: true,
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(pdfBuffer);
+    });
+
+    console.log("PDF uploaded to Cloudinary:", uploadResult.secure_url);
+
+    // Generate a proper URL with download flag to ensure browser downloads the file
+    const downloadUrl = cloudinary.url(uploadResult.public_id, {
+      resource_type: "raw",
+      type: "upload",
+      flags: "attachment",
+      secure: true,
+    });
+
     return {
       success: true,
-      path: pdfPath,
-      fileName: pdfFileName,
+      url: downloadUrl,
+      publicId: uploadResult.public_id,
+      fileName: `${pdfFileName}.pdf`,
     };
   } catch (error) {
     if (browser) {

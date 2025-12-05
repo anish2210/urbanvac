@@ -15,6 +15,7 @@ urbanvac/
 
 - Node.js 18+ installed
 - MongoDB Atlas account (or MongoDB instance)
+- **Cloudinary account (for PDF storage)** - Sign up at https://cloudinary.com
 - Gmail account with App Password (for email functionality)
 - Hosting accounts for both frontend and backend
 
@@ -52,7 +53,22 @@ CLIENT_URL=https://your-frontend-domain.com
 
 # Invoice Configuration
 INVOICE_START_NUMBER=3000
+
+# Cloudinary Configuration (for PDF storage)
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
+
+**IMPORTANT: Cloudinary Setup**
+
+PDFs are now stored in Cloudinary (cloud storage) instead of local filesystem. This is essential for deployment platforms like Render, Heroku, etc., which have ephemeral file systems.
+
+To get your Cloudinary credentials:
+1. Sign up at https://cloudinary.com (free tier is sufficient)
+2. Go to Dashboard
+3. Copy your Cloud Name, API Key, and API Secret
+4. Add them to your environment variables
 
 ### 2. Deploy to Render (Recommended for Backend)
 
@@ -88,8 +104,9 @@ git subtree push --prefix server heroku main
 
 ### 5. Important Notes for Server Deployment
 
+- **Cloudinary**: PDFs are stored in Cloudinary (not local filesystem). Make sure to add Cloudinary credentials to environment variables.
 - Ensure the `assets` folder is included in your deployment (contains Header.png, Footer.png, urbanvaclogo.png)
-- The `invoices` folder will be created automatically on first use
+- **No need for `invoices` folder**: PDFs are stored in Cloudinary, not locally
 - Make sure your MongoDB Atlas IP whitelist includes your hosting provider's IPs (or use 0.0.0.0/0 for all IPs)
 - Set up Gmail App Password: Google Account > Security > 2-Step Verification > App Passwords
 

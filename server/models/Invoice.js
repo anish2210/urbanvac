@@ -101,9 +101,18 @@ const invoiceSchema = new mongoose.Schema(
       enum: ['draft', 'sent', 'paid', 'overdue', 'cancelled'],
       default: 'draft',
     },
+    pdfUrl: {
+      type: String,
+      default: null,
+    },
+    pdfPublicId: {
+      type: String,
+      default: null,
+    },
     pdfPath: {
       type: String,
       default: null,
+      // Deprecated: kept for backward compatibility, use pdfUrl instead
     },
     emailSent: {
       type: Boolean,

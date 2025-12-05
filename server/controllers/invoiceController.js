@@ -44,15 +44,18 @@ export const createInvoice = async (req, res) => {
       createdBy: null,
     });
 
-    // Generate PDF
+    // Generate PDF and upload to Cloudinary
     const pdfResult = await generateInvoicePDF(invoice);
-    invoice.pdfPath = pdfResult.path;
+    invoice.pdfUrl = pdfResult.url;
+    invoice.pdfPublicId = pdfResult.publicId;
+    invoice.pdfPath = pdfResult.url; // For backward compatibility
     await invoice.save();
 
     res.status(201).json({
       success: true,
       data: invoice,
-      pdfPath: pdfResult.fileName,
+      pdfUrl: pdfResult.url,
+      pdfFileName: pdfResult.fileName,
     });
   } catch (error) {
     res.status(500).json({
@@ -170,12 +173,12 @@ export const updateInvoice = async (req, res) => {
       runValidators: true,
     });
 
-    // Regenerate PDF if needed
-    if (invoice.pdfPath) {
-      const pdfResult = await generateInvoicePDF(invoice);
-      invoice.pdfPath = pdfResult.path;
-      await invoice.save();
-    }
+    // Regenerate PDF and upload to Cloudinary
+    const pdfResult = await generateInvoicePDF(invoice);
+    invoice.pdfUrl = pdfResult.url;
+    invoice.pdfPublicId = pdfResult.publicId;
+    invoice.pdfPath = pdfResult.url; // For backward compatibility
+    await invoice.save();
 
     res.json({
       success: true,
@@ -231,15 +234,17 @@ export const sendInvoice = async (req, res) => {
       });
     }
 
-    // Generate PDF if not exists
-    if (!invoice.pdfPath) {
+    // Generate PDF if not exists and upload to Cloudinary
+    if (!invoice.pdfUrl) {
       const pdfResult = await generateInvoicePDF(invoice);
-      invoice.pdfPath = pdfResult.path;
+      invoice.pdfUrl = pdfResult.url;
+      invoice.pdfPublicId = pdfResult.publicId;
+      invoice.pdfPath = pdfResult.url; // For backward compatibility
       await invoice.save();
     }
 
     // Send email
-    const emailResult = await sendInvoiceEmail(invoice, invoice.pdfPath);
+    const emailResult = await sendInvoiceEmail(invoice, invoice.pdfUrl);
 
     // Update invoice status
     invoice.emailSent = true;
@@ -265,7 +270,7 @@ export const sendInvoice = async (req, res) => {
   }
 };
 
-// @desc    Download invoice PDF
+// @desc    Download invoice PDF (redirect to Cloudinary URL)
 // @route   GET /api/invoices/:id/download
 // @access  Private
 export const downloadInvoice = async (req, res) => {
@@ -279,15 +284,17 @@ export const downloadInvoice = async (req, res) => {
       });
     }
 
-    // Generate PDF if not exists
-    if (!invoice.pdfPath) {
+    // Generate PDF if not exists and upload to Cloudinary
+    if (!invoice.pdfUrl) {
       const pdfResult = await generateInvoicePDF(invoice);
-      invoice.pdfPath = pdfResult.path;
+      invoice.pdfUrl = pdfResult.url;
+      invoice.pdfPublicId = pdfResult.publicId;
+      invoice.pdfPath = pdfResult.url; // For backward compatibility
       await invoice.save();
     }
 
-    // Send file
-    res.download(invoice.pdfPath);
+    // Redirect to Cloudinary URL for download
+    res.redirect(invoice.pdfUrl);
   } catch (error) {
     res.status(500).json({
       success: false,
