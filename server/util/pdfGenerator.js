@@ -373,7 +373,8 @@ export const generateInvoicePDF = async (invoice) => {
         "--disable-gpu",
         "--font-render-hinting=none",
       ],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+      // Let Puppeteer find Chrome from its own cache
+      // The build script installs it via: npx puppeteer browsers install chrome
     });
 
     const page = await browser.newPage();

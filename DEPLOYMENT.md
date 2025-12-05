@@ -77,11 +77,20 @@ To get your Cloudinary credentials:
 3. Connect your GitHub repository
 4. Configure the service:
    - **Root Directory**: `server`
-   - **Build Command**: `npm install`
+   - **Build Command**: `npm run build`
    - **Start Command**: `npm start`
    - **Environment**: Node
 5. Add environment variables from your `.env` file in the Render dashboard
 6. Deploy
+
+**IMPORTANT: Puppeteer Configuration for Render**
+
+The application uses Puppeteer to generate PDFs, which requires Chrome to be installed on the server. The project includes a `render-build.sh` script that handles Chrome installation automatically.
+
+Make sure:
+- The build command is set to `npm run build` (NOT just `npm install`)
+- This script will install Chrome dependencies needed for PDF generation
+- No additional environment variables are needed for Puppeteer - it will automatically find Chrome
 
 ### 3. Alternative: Deploy to Railway
 
@@ -297,6 +306,13 @@ Consider adding:
    - Restart your deployment after adding variables
    - Check variable names match exactly (case-sensitive)
    - For Vite variables, ensure they start with `VITE_`
+
+6. **PDF Generation Fails (Puppeteer Error)**
+   - **Error**: "Browser was not found at the configured executablePath"
+   - **Solution**: Ensure the build command is set to `npm run build` in your Render dashboard
+   - The `render-build.sh` script must run during build to install Chrome
+   - If you're using another platform (Heroku, Railway), you may need additional buildpacks or configuration
+   - Check the build logs to ensure Chrome is being installed successfully
 
 ---
 
