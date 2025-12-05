@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+import htmlPdf from "html-pdf-node";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
@@ -359,29 +359,11 @@ const generateInvoiceHTML = (invoice) => {
 
 // Generate PDF from invoice data and upload to Cloudinary
 export const generateInvoicePDF = async (invoice) => {
-  let browser;
   try {
     const html = generateInvoiceHTML(invoice);
 
-    // Puppeteer launch for Render.com
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--font-render-hinting=none",
-      ],
-      // Let Puppeteer find Chrome from its own cache
-      // The build script installs it via: npx puppeteer browsers install chrome
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-
-    // Generate PDF as buffer (in memory, not saved to disk)
-    const pdfBuffer = await page.pdf({
+    // PDF generation options for html-pdf-node
+    const options = {
       format: "A4",
       printBackground: true,
       margin: {
@@ -390,9 +372,12 @@ export const generateInvoicePDF = async (invoice) => {
         bottom: "0px",
         left: "0px",
       },
-    });
+    };
 
-    await browser.close();
+    const file = { content: html };
+
+    // Generate PDF as buffer (in memory)
+    const pdfBuffer = await htmlPdf.generatePdf(file, options);
 
     // Upload PDF buffer to Cloudinary
     const pdfFileName = `INV-NO_${invoice.invoiceNumber}`;
@@ -415,7 +400,7 @@ export const generateInvoicePDF = async (invoice) => {
 
     console.log("PDF uploaded to Cloudinary:", uploadResult.secure_url);
 
-    // Generate a proper URL with download flag to ensure browser downloads the file
+    // Generate download URL
     const downloadUrl = cloudinary.url(uploadResult.public_id, {
       resource_type: "raw",
       type: "upload",
@@ -430,9 +415,6 @@ export const generateInvoicePDF = async (invoice) => {
       fileName: `${pdfFileName}.pdf`,
     };
   } catch (error) {
-    if (browser) {
-      await browser.close();
-    }
     console.error("PDF generation error:", error);
     throw new Error(`Failed to generate PDF: ${error.message}`);
   }
