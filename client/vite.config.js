@@ -8,4 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  publicDir: 'public', // Ensures _redirects file is copied to dist
 })
