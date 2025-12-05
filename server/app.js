@@ -49,6 +49,22 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    name: 'Urban Vac Invoice System API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      invoices: '/api/invoices',
+      admin: '/api/admin',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check route
 app.get('/health', (req, res) => {
   res.json({
