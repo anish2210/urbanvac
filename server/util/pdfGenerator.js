@@ -298,7 +298,14 @@ export const generateInvoicePDF = async (invoice) => {
 
     console.log("PDF uploaded to Cloudinary:", uploadResult.secure_url);
 
-    // Generate download URL
+    // Generate view URL (opens in browser)
+    const viewUrl = cloudinary.url(uploadResult.public_id, {
+      resource_type: "raw",
+      type: "upload",
+      secure: true,
+    });
+
+    // Generate download URL (forces download)
     const downloadUrl = cloudinary.url(uploadResult.public_id, {
       resource_type: "raw",
       type: "upload",
@@ -308,7 +315,9 @@ export const generateInvoicePDF = async (invoice) => {
 
     return {
       success: true,
-      url: downloadUrl,
+      url: downloadUrl, // Default to download URL for backward compatibility
+      viewUrl: viewUrl, // URL to view PDF in browser
+      downloadUrl: downloadUrl, // URL to download PDF
       publicId: uploadResult.public_id,
       fileName: `${pdfFileName}.pdf`,
     };

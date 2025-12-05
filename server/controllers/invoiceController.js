@@ -47,6 +47,8 @@ export const createInvoice = async (req, res) => {
     // Generate PDF and upload to Cloudinary
     const pdfResult = await generateInvoicePDF(invoice);
     invoice.pdfUrl = pdfResult.url;
+    invoice.pdfViewUrl = pdfResult.viewUrl;
+    invoice.pdfDownloadUrl = pdfResult.downloadUrl;
     invoice.pdfPublicId = pdfResult.publicId; // Stores Cloudinary public ID
     invoice.pdfPath = pdfResult.url; // For backward compatibility
     await invoice.save();
@@ -176,6 +178,8 @@ export const updateInvoice = async (req, res) => {
     // Regenerate PDF and upload to Cloudinary
     const pdfResult = await generateInvoicePDF(invoice);
     invoice.pdfUrl = pdfResult.url;
+    invoice.pdfViewUrl = pdfResult.viewUrl;
+    invoice.pdfDownloadUrl = pdfResult.downloadUrl;
     invoice.pdfPublicId = pdfResult.publicId; // Stores Cloudinary public ID
     invoice.pdfPath = pdfResult.url; // For backward compatibility
     await invoice.save();
@@ -238,6 +242,8 @@ export const sendInvoice = async (req, res) => {
     if (!invoice.pdfUrl) {
       const pdfResult = await generateInvoicePDF(invoice);
       invoice.pdfUrl = pdfResult.url;
+      invoice.pdfViewUrl = pdfResult.viewUrl;
+      invoice.pdfDownloadUrl = pdfResult.downloadUrl;
       invoice.pdfPublicId = pdfResult.publicId; // Stores Cloudinary public ID
       invoice.pdfPath = pdfResult.url; // For backward compatibility
       await invoice.save();
@@ -288,6 +294,8 @@ export const downloadInvoice = async (req, res) => {
     if (!invoice.pdfUrl) {
       const pdfResult = await generateInvoicePDF(invoice);
       invoice.pdfUrl = pdfResult.url;
+      invoice.pdfViewUrl = pdfResult.viewUrl;
+      invoice.pdfDownloadUrl = pdfResult.downloadUrl;
       invoice.pdfPublicId = pdfResult.publicId; // Stores Cloudinary public ID
       invoice.pdfPath = pdfResult.url; // For backward compatibility
       await invoice.save();

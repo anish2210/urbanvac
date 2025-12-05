@@ -105,6 +105,14 @@ const invoiceSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    pdfViewUrl: {
+      type: String,
+      default: null,
+    },
+    pdfDownloadUrl: {
+      type: String,
+      default: null,
+    },
     pdfPublicId: {
       type: String,
       default: null,
