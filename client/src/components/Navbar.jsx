@@ -15,7 +15,7 @@ export const Navbar = () => {
   const navLinks = [
     // { to: "/admin", icon: Settings, label: "Admin Panel" },
     { to: "/invoices/new", icon: FileText, label: "New Invoice" },
-    { to: "/dashboard", icon: LayoutDashboard, label: "All Invoices" },
+    { to: "/dashboard", icon: LayoutDashboard, label: "All Documents" },
   ];
 
   return (

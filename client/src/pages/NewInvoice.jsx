@@ -410,7 +410,7 @@ const NewInvoice = () => {
               className="flex items-center space-x-2 bg-gradient-to-r from-orange-500 to-red-600 hover:brightness-110"
             >
               <FileText size={18} />
-              <span>Create Invoice</span>
+              <span>Create Document</span>
             </Button>
           </div>
         </form>

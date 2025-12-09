@@ -42,226 +42,231 @@ const createInvoicePDF = (invoice) => {
         doc.image(headerPath, 0, 0, { width: 595 });
       }
 
-      // Document title
+      // Document title - centered below header (reduced spacing)
       doc
         .font("Helvetica-Bold")
-        .fontSize(28)
-        .fillColor("#333")
-        .text(docType, 0, headerPath ? 150 : 40, {
+        .fontSize(18)
+        .fillColor("#1a1a1a")
+        .text(docType, 0, headerPath ? 210 : 40, {
           align: "center",
           width: 595,
         });
 
-      // Left column - To & Bank Details
+      // Left column - To
       doc
         .font("Helvetica-Bold")
-        .fontSize(14)
-        .fillColor("#333")
-        .text("To", 40, 200);
+        .fontSize(10)
+        .fillColor("#1a1a1a")
+        .text("To", 47, 295);
 
       doc
         .font("Helvetica")
-        .fontSize(13)
+        .fontSize(9)
         .fillColor("#333")
-        .text(invoice.customer.phone, 40, 220)
-        .text(invoice.customer.address, 40, 235);
+        .text(invoice.customer.phone, 47, 315)
+        .text(invoice.customer.address, 47, 330, { width: 280 });
 
-      // Bank Details
+      // Right column - From (right-aligned)
       doc
         .font("Helvetica-Bold")
-        .fontSize(14)
-        .fillColor("#333")
-        .text("Bank Details", 40, 280);
+        .fontSize(10)
+        .fillColor("#1a1a1a")
+        .text("From", 350, 295, { align: "right", width: 198 });
 
       doc
         .font("Helvetica")
-        .fontSize(13)
+        .fontSize(9)
         .fillColor("#333")
-        .text("Commbank BSB: 063 250", 40, 300)
-        .text("A/C Name: Singh", 40, 315)
-        .text("A/C: 1099 4913", 40, 330);
+        .text("Urbanvac Roof and Gutter Pty Ltd.", 350, 315, {
+          align: "right",
+          width: 198,
+        })
+        .text("19 Colchester Ave", 350, 330, { align: "right", width: 198 })
+        .text("Cranbourne West 3977", 350, 345, {
+          align: "right",
+          width: 198,
+        });
 
-      // Right column - From & Bill Details
+      // Bank Details (left column)
       doc
         .font("Helvetica-Bold")
-        .fontSize(14)
-        .fillColor("#333")
-        .text("From", 350, 200);
+        .fontSize(10)
+        .fillColor("#1a1a1a")
+        .text("Bank Details", 47, 370);
 
       doc
         .font("Helvetica")
-        .fontSize(13)
+        .fontSize(9)
         .fillColor("#333")
-        .text("Urbanvac Roof and Gutter Pty Ltd.", 350, 220)
-        .text("19 Colchester Ave", 350, 235)
-        .text("Cranbourne West 3977", 350, 250);
+        .text("Commbank BSB: 063 250", 47, 390)
+        .text("A/C Name: Singh", 47, 405)
+        .text("A/C: 1099 4913", 47, 420);
 
-      // Bill Details
+      // Bill Details (right column, right-aligned)
       doc
         .font("Helvetica-Bold")
-        .fontSize(13)
-        .fillColor("#333")
-        .text(`Bill No: `, 350, 290)
-        .font("Helvetica")
-        .text(invoice.invoiceNumber, 420, 290);
+        .fontSize(9)
+        .fillColor("#1a1a1a")
+        .text(`Bill No: ${invoice.invoiceNumber}`, 350, 385, {
+          align: "right",
+          width: 198,
+        });
 
       doc
         .font("Helvetica-Bold")
-        .text(`Bill Date: `, 350, 305)
-        .font("Helvetica")
+        .fontSize(9)
+        .fillColor("#1a1a1a")
         .text(
-          new Date(invoice.issueDate).toLocaleDateString("en-AU", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-          }),
-          420,
-          305
+          `Bill Date: ${new Date(invoice.issueDate).toLocaleDateString(
+            "en-AU",
+            {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }
+          )}`,
+          350,
+          405,
+          {
+            align: "right",
+            width: 198,
+          }
         );
 
       // Items section
-      let yPos = 370;
+      let yPos = 450;
       doc
         .font("Helvetica-Bold")
-        .fontSize(16)
-        .fillColor("#333")
-        .text("Items", 40, yPos);
+        .fontSize(10)
+        .fillColor("#1a1a1a")
+        .text("Items", 47, yPos);
 
-      yPos += 25;
+      yPos += 18;
 
-      // Table header
-      doc.rect(40, yPos, 515, 30).fillAndStroke("#e8e8e8", "#ccc");
+      // Table header with border (reduced height)
+      doc.rect(47, yPos, 500, 24).fillAndStroke("#d9d9d9", "#999");
 
       doc
         .font("Helvetica-Bold")
-        .fontSize(13)
-        .fillColor("#000")
-        .text("Item", 50, yPos + 8, { width: 200 })
-        .text("Quantity", 260, yPos + 8, { width: 80, align: "center" })
-        .text("Price", 350, yPos + 8, { width: 80, align: "right" })
-        .text("Total", 440, yPos + 8, { width: 100, align: "right" });
+        .fontSize(9)
+        .fillColor("#1a1a1a")
+        .text("Item", 60, yPos + 7, { width: 220 })
+        .text("Quantity", 290, yPos + 7, { width: 70, align: "center" })
+        .text("Price", 370, yPos + 7, { width: 80, align: "center" })
+        .text("Total", 460, yPos + 7, { width: 75, align: "center" });
 
-      yPos += 30;
+      yPos += 24;
 
       // Table rows
-      doc.font("Helvetica").fontSize(13).fillColor("#333");
+      doc.font("Helvetica").fontSize(8).fillColor("#333");
 
-      invoice.items.forEach((item) => {
+      invoice.items.forEach((item, index) => {
         // Check if we need a new page
         if (yPos > 700) {
           doc.addPage({ size: "A4", margin: 0 });
           yPos = 50;
         }
 
-        doc.rect(40, yPos, 515, 1).fillAndStroke("#ccc");
-        yPos += 1;
+        // Row with border (reduced height to 24)
+        doc
+          .rect(47, yPos, 500, 24)
+          .stroke("#999");
 
         doc
-          .text(item.description, 50, yPos + 10, { width: 200 })
-          .text(item.quantity.toString(), 260, yPos + 10, {
+          .text(item.description, 60, yPos + 7, { width: 220 })
+          .text(item.quantity.toString(), 290, yPos + 7, {
+            width: 70,
+            align: "center",
+          })
+          .text(`$${item.price.toFixed(2)}`, 370, yPos + 7, {
             width: 80,
             align: "center",
           })
-          .text(`$${item.price.toFixed(2)}`, 350, yPos + 10, {
-            width: 80,
-            align: "right",
-          })
-          .text(`$${item.total.toFixed(2)}`, 440, yPos + 10, {
-            width: 100,
-            align: "right",
+          .text(`$${item.total.toFixed(2)}`, 460, yPos + 7, {
+            width: 75,
+            align: "center",
           });
 
-        yPos += 35;
+        yPos += 24;
       });
 
-      doc.rect(40, yPos, 515, 1).fillAndStroke("#ccc");
-      yPos += 20;
+      yPos += 8;
 
-      // Totals
+      // Totals (right-aligned)
+      const totalsX = 385;
       doc
         .font("Helvetica")
-        .fontSize(14)
+        .fontSize(9)
         .fillColor("#333")
-        .text(`Subtotal: $${invoice.subtotal.toFixed(2)}`, 440, yPos, {
-          width: 100,
+        .text(`Subtotal: $${invoice.subtotal.toFixed(2)}`, totalsX, yPos, {
+          width: 162,
           align: "right",
         });
 
-      yPos += 20;
+      yPos += 15;
 
       if (invoice.gst > 0) {
-        doc.text(`GST (10%): $${invoice.gst.toFixed(2)}`, 440, yPos, {
-          width: 100,
+        doc.text(`GST (10%): $${invoice.gst.toFixed(2)}`, totalsX, yPos, {
+          width: 162,
           align: "right",
         });
-        yPos += 20;
+        yPos += 15;
       }
 
       doc
         .font("Helvetica-Bold")
-        .fontSize(16)
-        .text(`Total: $${invoice.total.toFixed(2)}`, 440, yPos, {
-          width: 100,
+        .fontSize(10)
+        .fillColor("#1a1a1a")
+        .text(`Total: $${invoice.total.toFixed(2)}`, totalsX, yPos, {
+          width: 162,
           align: "right",
         });
 
-      yPos += 40;
+      yPos += 18;
 
-      // Notes section if exists
-      if (invoice.notes) {
-        if (yPos > 650) {
-          doc.addPage({ size: "A4", margin: 0 });
-          yPos = 50;
+      // Notes section if exists (compact, fits before footer)
+      if (invoice.notes && yPos < 690) {
+        // Only add notes if there's space before footer
+        const availableHeight = Math.min(45, 735 - yPos);
+        if (availableHeight >= 30) {
+          doc
+            .rect(47, yPos, 500, availableHeight)
+            .fillAndStroke("#f5f5f5", "#f5f5f5");
+
+          doc
+            .font("Helvetica-Bold")
+            .fontSize(8)
+            .fillColor("#1a1a1a")
+            .text("Notes:", 65, yPos + 6);
+
+          doc
+            .font("Helvetica")
+            .fontSize(7)
+            .fillColor("#333")
+            .text(invoice.notes, 65, yPos + 16, {
+              width: 465,
+              height: availableHeight - 20,
+            });
+
+          yPos += availableHeight;
         }
-
-        doc
-          .rect(40, yPos, 515, 80)
-          .fillAndStroke("#f8f9fa", "#f8f9fa")
-          .fillColor("#333");
-
-        doc
-          .font("Helvetica-Bold")
-          .fontSize(13)
-          .text("Notes:", 50, yPos + 10);
-
-        doc
-          .font("Helvetica")
-          .fontSize(13)
-          .text(invoice.notes, 50, yPos + 30, { width: 495 });
-
-        yPos += 90;
       }
-
-      // Thank you message
-      if (yPos > 700) {
-        doc.addPage({ size: "A4", margin: 0 });
-        yPos = 50;
-      }
-
-      doc
-        .font("Helvetica-Bold")
-        .fontSize(14)
-        .fillColor("#333")
-        .text("Thank you for your business!", 0, yPos + 20, {
-          align: "center",
-          width: 595,
-        });
 
       // Footer - positioned at bottom of last page
       const footerPath = getImagePath("Footer.png");
       if (footerPath) {
         // Position footer at bottom of page
-        doc.image(footerPath, 0, 750, { width: 595 });
+        doc.image(footerPath, 0, 742, { width: 595, height: 100 });
       }
 
-      // ABN text on footer
+      // ABN text on footer (overlaid on footer image)
       doc
         .font("Helvetica-Bold")
-        .fontSize(24)
-        .fillColor("#333")
+        .fontSize(16)
+        .fillColor("#1a1a1a")
         .text("ABN : 50 679 172 948", 0, 760, {
           align: "right",
-          width: 555,
+          width: 545,
         });
 
       doc.end();

@@ -64,7 +64,7 @@ const InvoiceDashboard = () => {
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-10">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">All Invoices</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">All Document</h1>
             <p className="text-gray-500 mt-1 text-sm">
               Manage and track all your invoices & quotations
             </p>
