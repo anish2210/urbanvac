@@ -70,7 +70,11 @@ const NewInvoice = () => {
     const gst = formData.documentType === "invoice" ? subtotal * 0.1 : 0;
     const total = subtotal + gst;
 
-    setTotals({ subtotal, gst, total });
+    setTotals({
+      subtotal: parseFloat(subtotal.toFixed(2)),
+      gst: parseFloat(gst.toFixed(2)),
+      total: parseFloat(total.toFixed(2))
+    });
   };
 
   const handleCustomerChange = (field, value) => {
@@ -90,7 +94,7 @@ const NewInvoice = () => {
     if (field === "quantity" || field === "price") {
       const quantity = parseFloat(newItems[index].quantity) || 0;
       const price = parseFloat(newItems[index].price) || 0;
-      newItems[index].total = quantity * price;
+      newItems[index].total = parseFloat((quantity * price).toFixed(2));
     }
 
     setFormData({ ...formData, items: newItems });
@@ -298,7 +302,7 @@ const NewInvoice = () => {
                       label="Quantity"
                       type="number"
                       min="0"
-                      step="1"
+                      step="0.01"
                       value={item.quantity}
                       onChange={(e) =>
                         handleItemChange(index, "quantity", e.target.value)
@@ -313,7 +317,7 @@ const NewInvoice = () => {
                       label="Price"
                       type="number"
                       min="0"
-                      step="1"
+                      step="0.01"
                       value={item.price}
                       onChange={(e) =>
                         handleItemChange(index, "price", e.target.value)
