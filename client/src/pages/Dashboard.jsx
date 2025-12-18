@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { invoiceAPI } from "../utils/api";
+import { Mail, MailCheck, Trash2 } from "lucide-react";
 
 const InvoiceDashboard = () => {
   const [invoices, setInvoices] = useState([]);
@@ -21,6 +22,20 @@ const InvoiceDashboard = () => {
       setInvoices([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id, invoiceNumber) => {
+    if (window.confirm(`Are you sure you want to delete Invoice #${invoiceNumber}? This action cannot be undone.`)) {
+      try {
+        await invoiceAPI.delete(id);
+        // Refresh the list after deletion
+        fetchInvoices();
+        alert("Invoice deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting invoice:", error);
+        alert("Failed to delete invoice. Please try again.");
+      }
     }
   };
 
@@ -76,7 +91,7 @@ const InvoiceDashboard = () => {
             text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-700 
             transition-all duration-200 shadow-lg"
           >
-            + New Invoice
+            + New Document
           </button>
         </div>
 
@@ -92,11 +107,12 @@ const InvoiceDashboard = () => {
                     "Amount",
                     "Type",
                     "Date",
+                    "Email",
                     "Actions",
                   ].map((heading) => (
                     <th
                       key={heading}
-                      className="py-4 px-6 text-left text-gray-700 font-medium text-sm tracking-wide"
+                      className="py-4 px-6 text-center text-gray-700 font-medium text-sm tracking-wide"
                     >
                       {heading}
                     </th>
@@ -108,7 +124,7 @@ const InvoiceDashboard = () => {
                 {!Array.isArray(invoices) || invoices.length === 0 ? (
                   <tr>
                     <td
-                      colSpan="6"
+                      colSpan="7"
                       className="py-10 text-center text-gray-500 text-sm"
                     >
                       No invoices found. Create your first invoice!
@@ -120,19 +136,19 @@ const InvoiceDashboard = () => {
                       key={inv._id}
                       className="border-b border-black/5 hover:bg-black/5 transition"
                     >
-                      <td className="py-4 px-6 font-medium text-gray-900">
+                      <td className="py-4 px-6 font-medium text-gray-900 align-middle text-center">
                         #{inv.invoiceNumber || inv.invoiceId}
                       </td>
 
-                      <td className="py-4 px-6 text-gray-700">
+                      <td className="py-4 px-6 text-gray-700 align-middle text-center">
                         {inv.customer?.name || inv.clientName || "-"}
                       </td>
 
-                      <td className="py-4 px-6 font-semibold text-gray-900">
+                      <td className="py-4 px-6 font-semibold text-gray-900 align-middle text-center">
                         ${(inv.total || inv.amount || 0).toFixed(2)}
                       </td>
 
-                      <td className="py-4 px-6">
+                      <td className="py-4 px-6 align-middle text-center">
                         <span
                           className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${documentTypeColor(
                             inv.documentType
@@ -142,7 +158,7 @@ const InvoiceDashboard = () => {
                         </span>
                       </td>
 
-                      <td className="py-4 px-6 text-gray-600">
+                      <td className="py-4 px-6 text-gray-600 align-middle text-center">
                         {inv.issueDate || inv.date
                           ? new Date(
                               inv.issueDate || inv.date
@@ -150,13 +166,43 @@ const InvoiceDashboard = () => {
                           : "-"}
                       </td>
 
-                      <td className="py-4 px-6">
-                        <button
-                          onClick={() => window.open(`/invoices/${inv._id}`, '_blank')}
-                          className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
-                        >
-                          View
-                        </button>
+                      <td className="py-4 px-6 align-middle text-center">
+                        <div className="flex items-center justify-center">
+                          {inv.emailSent ? (
+                            <div className="relative group">
+                              <MailCheck
+                                className="w-5 h-5 text-green-600"
+                                title="Email sent"
+                              />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                Sent on {inv.emailSentAt ? new Date(inv.emailSentAt).toLocaleString() : 'N/A'}
+                              </div>
+                            </div>
+                          ) : (
+                            <Mail
+                              className="w-5 h-5 text-gray-400"
+                              title="Email not sent"
+                            />
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="py-4 px-6 align-middle text-center">
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            onClick={() => window.open(`/invoices/${inv._id}`, '_blank')}
+                            className="text-orange-500 hover:text-orange-600 font-medium transition-colors cursor-pointer"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => handleDelete(inv._id, inv.invoiceNumber)}
+                            className="text-red-500 hover:text-red-700 transition-colors cursor-pointer"
+                            title="Delete invoice"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))

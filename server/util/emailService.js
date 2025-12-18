@@ -1,4 +1,5 @@
-import nodemailer from 'nodemailer';
+import pkg from 'nodemailer';
+const { createTransport } = pkg;
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -7,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 // Create transporter
 const createTransporter = () => {
-  return nodemailer.createTransporter({
+  return createTransport({
     host: process.env.EMAIL_HOST,
     port: process.env.EMAIL_PORT,
     secure: process.env.EMAIL_SECURE === 'true',

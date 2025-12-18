@@ -1,6 +1,7 @@
 import Invoice from '../models/Invoice.js';
 import { generateInvoicePDF } from '../util/pdfGenerator.js';
 import { sendInvoiceEmail } from '../util/emailService.js';
+import cloudinary from '../config/cloudinary.js';
 
 // @desc    Get next invoice number
 // @route   GET /api/invoices/next-number
@@ -53,11 +54,31 @@ export const createInvoice = async (req, res) => {
     invoice.pdfPath = pdfResult.url; // For backward compatibility
     await invoice.save();
 
+    // Automatically send email to customer
+    try {
+      const emailResult = await sendInvoiceEmail(invoice, invoice.pdfUrl);
+
+      // Update invoice email status
+      invoice.emailSent = true;
+      invoice.emailSentAt = new Date();
+      if (invoice.status === 'draft') {
+        invoice.status = 'sent';
+      }
+      await invoice.save();
+
+      console.log(`Email sent successfully to ${invoice.customer.email}`);
+    } catch (emailError) {
+      console.error('Failed to send email:', emailError.message);
+      // Don't fail the invoice creation if email fails
+      // Just log the error and continue
+    }
+
     res.status(201).json({
       success: true,
       data: invoice,
       pdfUrl: pdfResult.url,
       pdfFileName: pdfResult.fileName,
+      emailSent: invoice.emailSent,
     });
   } catch (error) {
     res.status(500).json({
@@ -208,6 +229,19 @@ export const deleteInvoice = async (req, res) => {
         success: false,
         message: 'Invoice not found',
       });
+    }
+
+    // Delete PDF from Cloudinary if exists
+    if (invoice.pdfPublicId) {
+      try {
+        await cloudinary.uploader.destroy(invoice.pdfPublicId, {
+          resource_type: 'raw', // PDFs are stored as 'raw' type in Cloudinary
+        });
+        console.log(`Deleted PDF from Cloudinary: ${invoice.pdfPublicId}`);
+      } catch (cloudinaryError) {
+        console.error('Error deleting from Cloudinary:', cloudinaryError);
+        // Continue with invoice deletion even if Cloudinary deletion fails
+      }
     }
 
     await invoice.deleteOne();
