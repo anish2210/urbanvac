@@ -39,6 +39,38 @@ const InvoiceDashboard = () => {
     }
   };
 
+  const handleSendEmail = async (id, invoiceNumber) => {
+    try {
+      console.log("Preparing email for invoice:", id);
+
+      // Call API to get email content
+      const response = await invoiceAPI.send(id);
+      console.log("API Response:", response.data);
+
+      const { emailContent } = response.data.data;
+      console.log("Email Content:", emailContent);
+
+      // Create Gmail compose URL
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+        emailContent.to
+      )}&su=${encodeURIComponent(emailContent.subject)}&body=${encodeURIComponent(
+        emailContent.body
+      )}`;
+
+      console.log("Opening Gmail URL:", gmailUrl);
+
+      // Open Gmail compose in new tab
+      window.open(gmailUrl, "_blank");
+
+      // Refresh invoices to show updated email status
+      fetchInvoices();
+    } catch (error) {
+      console.error("Error preparing email:", error);
+      console.error("Error details:", error.response?.data);
+      alert("Failed to prepare email. Please try again.");
+    }
+  };
+
   const documentTypeColor = (type) => {
     switch (type?.toLowerCase()) {
       case "invoice":
@@ -171,17 +203,19 @@ const InvoiceDashboard = () => {
                           {inv.emailSent ? (
                             <div className="relative group">
                               <MailCheck
-                                className="w-5 h-5 text-green-600"
-                                title="Email sent"
+                                className="w-5 h-5 text-green-600 cursor-pointer hover:text-green-700"
+                                title="Click to resend email"
+                                onClick={() => handleSendEmail(inv._id, inv.invoiceNumber)}
                               />
                               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                Sent on {inv.emailSentAt ? new Date(inv.emailSentAt).toLocaleString() : 'N/A'}
+                                Sent on {inv.emailSentAt ? new Date(inv.emailSentAt).toLocaleString() : 'N/A'}. Click to resend.
                               </div>
                             </div>
                           ) : (
                             <Mail
-                              className="w-5 h-5 text-gray-400"
-                              title="Email not sent"
+                              className="w-5 h-5 text-orange-500 cursor-pointer hover:text-orange-600"
+                              title="Click to send email"
+                              onClick={() => handleSendEmail(inv._id, inv.invoiceNumber)}
                             />
                           )}
                         </div>

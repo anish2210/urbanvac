@@ -1,6 +1,6 @@
 import Invoice from '../models/Invoice.js';
 import { generateInvoicePDF } from '../util/pdfGenerator.js';
-import { sendInvoiceEmail } from '../util/emailService.js';
+import { generateEmailContent } from '../util/emailService.js';
 import cloudinary from '../config/cloudinary.js';
 
 // @desc    Get next invoice number
@@ -278,15 +278,15 @@ export const sendInvoice = async (req, res) => {
       invoice.pdfUrl = pdfResult.url;
       invoice.pdfViewUrl = pdfResult.viewUrl;
       invoice.pdfDownloadUrl = pdfResult.downloadUrl;
-      invoice.pdfPublicId = pdfResult.publicId; // Stores Cloudinary public ID
-      invoice.pdfPath = pdfResult.url; // For backward compatibility
+      invoice.pdfPublicId = pdfResult.publicId;
+      invoice.pdfPath = pdfResult.url;
       await invoice.save();
     }
 
-    // Send email
-    const emailResult = await sendInvoiceEmail(invoice, invoice.pdfUrl);
+    // Generate email content for Gmail compose
+    const emailContent = generateEmailContent(invoice);
 
-    // Update invoice status
+    // Update invoice status (admin will send manually)
     invoice.emailSent = true;
     invoice.emailSentAt = new Date();
     if (invoice.status === 'draft') {
@@ -296,10 +296,10 @@ export const sendInvoice = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Invoice sent successfully',
+      message: 'Email content generated successfully',
       data: {
         invoice,
-        emailMessageId: emailResult.messageId,
+        emailContent,
       },
     });
   } catch (error) {

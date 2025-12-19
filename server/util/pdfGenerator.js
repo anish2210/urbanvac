@@ -310,13 +310,16 @@ export const generateInvoicePDF = async (invoice) => {
       secure: true,
     });
 
-    // Generate download URL (forces download)
-    const downloadUrl = cloudinary.url(uploadResult.public_id, {
-      resource_type: "raw",
-      type: "upload",
-      flags: "attachment",
-      secure: true,
-    });
+    // Generate download URL (forces download with proper filename)
+    const documentTypeText = {
+      invoice: 'Invoice',
+      quotation: 'Quotation',
+      cash_receipt: 'Cash_Receipt',
+    };
+    const docTypeForFilename = documentTypeText[invoice.documentType] || 'Invoice';
+    const filename = `${docTypeForFilename}_${invoice.invoiceNumber}.pdf`;
+
+    const downloadUrl = `${uploadResult.secure_url}?response-content-disposition=attachment;filename="${encodeURIComponent(filename)}"`;
 
     return {
       success: true,

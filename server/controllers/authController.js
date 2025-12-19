@@ -1,6 +1,5 @@
 import User from '../models/User.js';
 import { generateToken } from '../middlewares/auth.js';
-import { sendWelcomeEmail } from '../util/emailService.js';
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -25,9 +24,6 @@ export const register = async (req, res) => {
       password,
       role: role || 'user',
     });
-
-    // Send welcome email (don't wait for it)
-    sendWelcomeEmail(user).catch(err => console.error('Welcome email failed:', err));
 
     // Generate token
     const token = generateToken(user._id);
